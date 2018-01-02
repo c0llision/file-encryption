@@ -8,6 +8,6 @@ DO NOT USE FOR ANYTHING IMPORTANT. Not finished.
 
 `scrypt`
 
-`pbkdf2 sha256`
+`pbkdf2-sha256`
 
 ### Uses AES cipher from the cryptography.io Python package
