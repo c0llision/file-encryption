@@ -1,5 +1,7 @@
 # file_encryption
 
+[![Build Status](https://travis-ci.org/c0llision/file_encryption.svg?branch=master)](https://travis-ci.org/c0llision/file_encryption)
+
 DO NOT USE FOR ANYTHING IMPORTANT. Not finished.
 
 `pip install -r requirements.txt`
