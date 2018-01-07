@@ -10,9 +10,11 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
-DEFAULT_KDF = 'scrypt'
-DEFAULT_KDF_TIME_MS = 500
 DEFAULT_CIPHER = 'fernetAES'
+DEFAULT_KDF_TIME_MS = 500
+PBKDF_MIN_ITERATIONS = 10000
+SCRYPT_MIN_ITERATIONS = 14
+DEFAULT_KDF = 'scrypt'
 
 
 def _encrypt(data, cipher, key):
@@ -68,7 +70,7 @@ def decrypt_data(obj, passw):
 
 
 def bench_kdf(kdf, target_ms=DEFAULT_KDF_TIME_MS):
-    if kdf.lower() == 'sha256':
+    if kdf.lower() == 'pbkdf':
         kdf_iterations = 100000
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -83,7 +85,8 @@ def bench_kdf(kdf, target_ms=DEFAULT_KDF_TIME_MS):
         end = time.time()
         elapsed = float((end - start))
         iterations = round((target_ms/1000) / elapsed * kdf_iterations)
-        iterations = max(iterations, 10000)
+
+        return max(iterations, PBKDF_MIN_ITERATIONS)
 
     elif kdf.lower() == 'scrypt':
         kdf_iterations = 14
@@ -107,12 +110,11 @@ def bench_kdf(kdf, target_ms=DEFAULT_KDF_TIME_MS):
             x /= 2
             i += 1
         iterations = kdf_iterations + i
-        iterations = max(iterations, 14)
+
+        return max(iterations, SCRYPT_MIN_ITERATIONS)
 
     else:
         raise Exception('Unknown KDF:', kdf)
-
-    return iterations
 
 
 def gen_salt():
@@ -121,8 +123,7 @@ def gen_salt():
 
 def derive_key(passw, salt, kdf_algo, iterations):
     kdf_algo = kdf_algo.lower()
-
-    if kdf_algo == 'sha256':
+    if kdf_algo == 'pbkdf':
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
@@ -143,8 +144,7 @@ def derive_key(passw, salt, kdf_algo, iterations):
     else:
         raise Exception('unknown kdf algorithm:', kdf_algo)
 
-    dkey = kdf.derive(passw.encode('utf-8'))
-    return dkey
+    return kdf.derive(passw.encode('utf-8'))
 
 
 def main():
@@ -168,6 +168,7 @@ def main():
         ciphertext2 = f.read()
     cleartext2 = decrypt_data(ciphertext2, password)
     print(cleartext2)
+
 
 if __name__ == '__main__':
     main()
