@@ -66,6 +66,7 @@ def decrypt_data(obj, passw):
 
     salt = urlsafe_b64decode(obj['salt'])
     key = derive_key(passw, salt, obj['kdf'], obj['iterations'])
+
     return _decrypt(obj['data'], obj['cipher'], key)
 
 
